@@ -1,5 +1,3 @@
 <resources>
     <string name="app_name">Music Player</string>
-    <string name="edit_text">Enter a Message</string>
-    <string name="button_send">Send</string>
 </resources>
