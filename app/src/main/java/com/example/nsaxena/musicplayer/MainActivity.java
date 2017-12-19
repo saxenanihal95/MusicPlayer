@@ -5,8 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.List;
 
-public class MainActivity extends Activity implements GetRawData.OnDownloadComplete{
+
+public class MainActivity extends Activity implements GetJsonData.OnDataAvailable{
 
     private static final String TAG = "MainActivity";
 
@@ -14,13 +16,17 @@ public class MainActivity extends Activity implements GetRawData.OnDownloadCompl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        GetRawData getRawData = new GetRawData(this);
-        getRawData.execute("http://starlord.hackerearth.com/studio");
     }
 
     @Override
-    public void onDownloadComplete(String data,DownloadStatus status)
+    protected void onResume() {
+        super.onResume();
+        GetJsonData getJsonData = new GetJsonData("http://starlord.hackerearth.com/studio",this);
+        getJsonData.executeOnSameThread();
+    }
+
+    @Override
+    public void onDataAvailable(List<Song> data, DownloadStatus status)
     {
         if(status==DownloadStatus.OK)
         {
