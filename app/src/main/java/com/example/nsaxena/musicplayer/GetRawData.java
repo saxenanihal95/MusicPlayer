@@ -28,14 +28,27 @@ class GetRawData extends AsyncTask<String,Void,String> {
 
     private static final String TAG = "GetRawData";
 
+    private final OnDownloadComplete mCallback;
+
     private DownloadStatus mDownloadStatus;
 
-    public GetRawData() {
+    interface OnDownloadComplete
+    {
+        void onDownloadComplete(String data,DownloadStatus status);
+    }
+
+    public GetRawData(OnDownloadComplete callback) {
         this.mDownloadStatus = mDownloadStatus.IDLE;
+        mCallback=callback;
     }
 
     @Override
     protected void onPostExecute(String s) {
+        //Log.d(TAG, "onPostExecute: parameter = "+s);
+        if(mCallback!=null)
+        {
+            mCallback.onDownloadComplete(s,mDownloadStatus);
+        }
     }
 
     @Override
@@ -51,7 +64,7 @@ class GetRawData extends AsyncTask<String,Void,String> {
         try {
             mDownloadStatus=DownloadStatus.PROCESSING;
             URL url = new URL(strings[0]);
-            connection = (HttpsURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
             int response=connection.getResponseCode();
