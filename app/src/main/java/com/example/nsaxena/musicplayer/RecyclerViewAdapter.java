@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,7 +14,6 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 
 
@@ -29,9 +29,21 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
 
     private Context mContext;
 
+    OnItemClickListener mOnItemClickListener;
+
     public RecyclerViewAdapter(ArrayList<Song> songList, MainActivity context) {
         mSongList = songList;
         mContext = context;
+    }
+
+    public interface OnItemClickListener
+    {
+        void onItemClick(Button button,View view,Song songObject,int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener)
+    {
+        mOnItemClickListener=onItemClickListener;
     }
 
     @Override
@@ -42,7 +54,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
     }
 
     @Override
-    public void onBindViewHolder(ImageViewHolder holder, int position) {
+    public void onBindViewHolder(final ImageViewHolder holder, final int position) {
         // Called by the layout manager when it want new data in an exisiting row
         final Song songItem=mSongList.get(position);
         Log.d(TAG, "onBindViewHolder: "+songItem.getSongImage()+"-->"+position);
@@ -52,6 +64,15 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
                 .into(holder.thumbnail);
         holder.title.setText(songItem.getSongTitle());
         holder.artists.setText(songItem.getSongArtists());
+        holder.play.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mOnItemClickListener!=null)
+                {
+                    mOnItemClickListener.onItemClick(holder.play,view,songItem,position);
+                }
+            }
+        });
     }
 
     @Override
@@ -78,6 +99,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
         ImageView thumbnail=null;
         TextView title=null;
         TextView artists=null;
+        Button play=null;
 
         public ImageViewHolder(View itemView)
         {
@@ -85,6 +107,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
             this.thumbnail=(ImageView)itemView.findViewById(R.id.coverPic);
             this.title=(TextView) itemView.findViewById(R.id.songTitle);
             this.artists=(TextView)itemView.findViewById(R.id.songArtist);
+            this.play=(Button)itemView.findViewById(R.id.play);
         }
     }
 }

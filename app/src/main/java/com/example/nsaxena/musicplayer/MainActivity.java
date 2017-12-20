@@ -2,8 +2,9 @@ package com.example.nsaxena.musicplayer;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,7 +12,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SeekBar;
 
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,25 +27,125 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
     private RecyclerViewAdapter mRecyclerViewAdapter;
 
     private LinearLayout mLinearScroll;
+
     private ListView mListView;
+
     private ArrayList<Song> mArrayListSong;
+
     private ArrayList<Song> mArrayListSongTemp;
     // change row size according to your need, how many row you needed per page
-    int rowSize = 3;
+
+    private MediaPlayer mMediaPlayer;
+
+    private SeekBar mSeekBar;
+    int rowSize = 1;
+
+    Handler mHandler ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
-        mArrayListSong = new ArrayList<Song>();
-        mArrayListSongTemp = new ArrayList<Song>();
+        mHandler = new Handler();
+
         mLinearScroll = (LinearLayout) findViewById(R.id.linear_scroll);
 
         RecyclerView recyclerView =(RecyclerView)findViewById(R.id.recycle_view);
+
+        mSeekBar=(SeekBar)findViewById(R.id.seekbar) ;
+
+        mArrayListSong = new ArrayList<Song>();
+
+        mArrayListSongTemp = new ArrayList<Song>();
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         mRecyclerViewAdapter = new RecyclerViewAdapter(new ArrayList<Song>(),this);
         recyclerView.setAdapter(mRecyclerViewAdapter);
+
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            boolean userTouch;
+            @Override
+            public void onStopTrackingTouch(SeekBar arg0) {
+                userTouch = false;
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar arg0) {
+                userTouch = true;
+            }
+            @Override
+            public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
+                if(mMediaPlayer!=null) {
+                    if (mMediaPlayer.isPlaying() && userTouch)
+                        mMediaPlayer.seekTo(arg1);
+
+                }
+            }
+        });
+        
+        mRecyclerViewAdapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(final Button button, View view, final Song songObject, int position) {
+                Runnable r =new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if(button.getText().toString().equals("Stop"))
+                            {
+                                button.setText("Play");
+                                mMediaPlayer.stop();
+                                mMediaPlayer.reset();
+                                mMediaPlayer.release();
+                                mMediaPlayer=null;
+                            }
+                            else
+                            {
+                                mMediaPlayer = new MediaPlayer();
+                                mMediaPlayer.setDataSource(songObject.getSongUrl());
+                                mMediaPlayer.prepareAsync();
+                                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                    @Override
+                                    public void onPrepared(MediaPlayer mediaPlayer) {
+                                        mediaPlayer.start();
+                                        mSeekBar.setProgress(0);
+                                        mSeekBar.setMax(mediaPlayer.getDuration());
+
+                                    }
+                                });
+                                button.setText("Stop");
+                            }
+                        }catch (IOException e){
+
+                        }
+                    }
+                };
+                mHandler.postDelayed(r,100);
+            }
+        });
+
+        Thread seekBarThread = new SeekBarThread();
+        seekBarThread.run();
+    }
+
+    public class SeekBarThread extends Thread
+    {
+        @Override
+        public void run() {
+            try{
+                Thread.sleep(1000);
+                if(mMediaPlayer!=null) {
+                    mSeekBar.setProgress(mMediaPlayer.getCurrentPosition());
+                }
+
+            }
+            catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -67,7 +171,7 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
              */
             addItem(0);
 
-            int size = data.size() / rowSize;
+            int size = mArrayListSong.size() / rowSize;
             Log.d(TAG, "onDataAvailable: data "+mArrayListSong.size());
             for (int j = 0; j < size; j++) {
                 final int k;
