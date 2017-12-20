@@ -51,6 +51,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.thumbnail);
         holder.title.setText(songItem.getSongTitle());
+        holder.artists.setText(songItem.getSongArtists());
     }
 
     @Override
@@ -76,12 +77,14 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
 
         ImageView thumbnail=null;
         TextView title=null;
+        TextView artists=null;
 
         public ImageViewHolder(View itemView)
         {
             super(itemView);
             this.thumbnail=(ImageView)itemView.findViewById(R.id.coverPic);
             this.title=(TextView) itemView.findViewById(R.id.songTitle);
+            this.artists=(TextView)itemView.findViewById(R.id.songArtist);
         }
     }
 }
