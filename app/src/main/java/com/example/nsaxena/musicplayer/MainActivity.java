@@ -46,6 +46,8 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
 
     @Override
     protected void onResume() {
+        LinearLayout ll = (LinearLayout) findViewById(R.id.linear_scroll);
+        ll.removeAllViews();
         super.onResume();
         GetJsonData getJsonData = new GetJsonData("http://starlord.hackerearth.com/studio",this);
         getJsonData.executeOnSameThread();
