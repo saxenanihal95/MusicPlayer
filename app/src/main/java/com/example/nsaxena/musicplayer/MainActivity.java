@@ -1,18 +1,11 @@
 package com.example.nsaxena.musicplayer;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -23,18 +16,9 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 
 
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 
 public class MainActivity extends Activity implements GetJsonData.OnDataAvailable {
@@ -199,7 +183,7 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
                         LinearLayout.LayoutParams.WRAP_CONTENT);
                 lp.setMargins(5, 2, 2, 2);
                 btnPage.setTextColor(Color.WHITE);
-                btnPage.setTextSize(26.0f);
+                btnPage.setTextSize(10.0f);
                 btnPage.setId(j);
                 btnPage.setText(String.valueOf(j + 1));
                 mLinearScroll.addView(btnPage, lp);
