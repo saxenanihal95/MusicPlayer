@@ -4,21 +4,24 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SeekBar;
-
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import android.support.v4.content.res.ResourcesCompat;
 
 
 public class MainActivity extends Activity implements GetJsonData.OnDataAvailable {
@@ -28,8 +31,6 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
     private RecyclerViewAdapter mRecyclerViewAdapter;
 
     private LinearLayout mLinearScroll;
-
-    private ListView mListView;
 
     private ArrayList<Song> mArrayListSong;
 
@@ -46,12 +47,20 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
 
     Handler mSeekBarHandler, mDownloadManagerHandler;
 
+    private EditText mSearchView;
+
+    private boolean mPlayPause;
+
+    private boolean mInitialState=true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        mSearchView=(EditText)findViewById(R.id.search_bar);
 
         mSeekBarHandler = new Handler();
 
@@ -70,6 +79,7 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mRecyclerViewAdapter = new RecyclerViewAdapter(new ArrayList<Song>(), this);
+
         recyclerView.setAdapter(mRecyclerViewAdapter);
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -103,8 +113,16 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
                     @Override
                     public void run() {
                         try {
-                            if (button.getText().toString().equals("Stop")) {
-                                button.setText("Play");
+
+                            if (button.getBackground().getConstantState()==getResources().getDrawable(R.drawable.pause).getConstantState()) {
+                                button.setText("P");
+                                final int sdk = android.os.Build.VERSION.SDK_INT;
+                                if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                                    button.setBackgroundDrawable( getResources().getDrawable(R.drawable.play) );
+                                } else {
+                                    button.setBackground( getResources().getDrawable(R.drawable.play));
+                                }
+                                //button.getBackground()== ResourcesCompat.getDrawable(getResources(), R.drawable.play, null);
                                 mMediaPlayer.stop();
                                 mMediaPlayer.reset();
                                 mMediaPlayer.release();
@@ -121,9 +139,15 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
                                         mSeekBar.setMax(mediaPlayer.getDuration());
                                     }
                                 });
-                                button.setText("Stop");
+                                button.setText("S");
+                                final int sdk = android.os.Build.VERSION.SDK_INT;
+                                if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                                    button.setBackgroundDrawable( getResources().getDrawable(R.drawable.pause) );
+                                } else {
+                                    button.setBackground( getResources().getDrawable(R.drawable.pause));
+                                }
                             }
-                        } catch (IOException e) {
+                        }catch (IOException e){
 
                         }
                     }
@@ -133,9 +157,13 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
             }
         });
 
+
+
         Thread seekBarThread = new SeekBarThread();
         seekBarThread.run();
     }
+
+
 
     public class SeekBarThread extends Thread {
         @Override
@@ -224,6 +252,4 @@ public class MainActivity extends Activity implements GetJsonData.OnDataAvailabl
 
         mRecyclerViewAdapter.loadNewData(mArrayListSongTemp);
     }
-
-
 }

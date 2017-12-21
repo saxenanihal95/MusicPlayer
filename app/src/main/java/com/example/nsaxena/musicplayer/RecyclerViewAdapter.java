@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,11 +24,13 @@ import com.bumptech.glide.request.RequestOptions;
  * Created by root on 19/12/17.
  */
 
-class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ImageViewHolder>{
+class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ImageViewHolder> implements Filterable{
 
     private static final String TAG = "RecyclerViewAdapter";
 
     private List<Song> mSongList;
+
+    private ArrayList<Song> mCurrentSongList;
 
     private Context mContext;
 
@@ -35,6 +39,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
     public RecyclerViewAdapter(ArrayList<Song> songList, MainActivity context) {
         mSongList = songList;
         mContext = context;
+        mCurrentSongList=songList;
     }
 
     public interface OnItemClickListener
@@ -109,5 +114,15 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.Image
             this.artists=(TextView)itemView.findViewById(R.id.songArtist);
             this.play=(Button)itemView.findViewById(R.id.play);
         }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return FilterHelper.newInstance(mCurrentSongList,this);
+    }
+
+    public void setSongList(ArrayList<Song> filteredSongs)
+    {
+        this.mSongList=filteredSongs;
     }
 }
